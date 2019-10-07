@@ -19,16 +19,16 @@ type Error struct {
 	str string
 }
 
-// NewError creates a new Error with a finalizer set that ensures that any
+// newError creates a new Error with a finalizer set that ensures that any
 // underlying allocated resources are freed.
-func NewError() *Error {
-	var err Error
-	runtime.SetFinalizer(&err, func(err *Error) {
-		if err.ptr != nil {
-			err.free()
+func newError() *Error {
+	var e Error
+	runtime.SetFinalizer(&e, func(e *Error) {
+		if e.ptr != nil {
+			e.free()
 		}
 	})
-	return &err
+	return &e
 }
 
 func (e *Error) free() {
@@ -38,7 +38,6 @@ func (e *Error) free() {
 
 func (e *Error) Error() string {
 	if len(e.str) == 0 && e.ptr != nil {
-		defer e.free()
 		e.str = string(make([]byte, 50))
 		cStr := C.CString(e.str)
 		defer C.free(unsafe.Pointer(cStr))

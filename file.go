@@ -3,17 +3,29 @@ package libpff
 // #include <stdlib.h>
 // #include <libpff.h>
 import "C"
-import "unsafe"
+import (
+	"fmt"
+	"runtime"
+	"unsafe"
+)
 
 // File is a *libpff_file_t.
 type File struct {
-	ptr *C.libpff_file_t
+	ptr      *C.libpff_file_t
+	filename string
 }
 
 // Open initializes and opens a new *File with the given filename and flags.
 func Open(filename string, flags int) (*File, error) {
 	var f File
-	err := NewError()
+	runtime.SetFinalizer(&f, func(f *File) {
+		if f.ptr != nil {
+			panic(fmt.Errorf("%v was garbage collected without being closed",
+				f.filename))
+		}
+	})
+
+	err := newError()
 	if retSuccess != C.libpff_file_initialize(&f.ptr, &err.ptr) {
 		return nil, err
 	}
@@ -30,7 +42,7 @@ func Open(filename string, flags int) (*File, error) {
 
 // Close closes and frees f.
 func (f *File) Close() error {
-	err := NewError()
+	err := newError()
 	if retSuccess != C.libpff_file_close(f.ptr, &err.ptr) {
 		return err
 	}
