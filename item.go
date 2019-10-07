@@ -30,8 +30,6 @@ func (i *Item) free() error {
 }
 
 // RootItem returns a new Item representing the root item for f.
-//
-// Callers are responsible for calling Free on the returned Item.
 func (f *File) RootItem() (*Item, error) {
 	i := newItem()
 	err := newError()
@@ -42,8 +40,6 @@ func (f *File) RootItem() (*Item, error) {
 }
 
 // RootFolder returns a new Item representing the root folder for f.
-//
-// Callers are responsible for calling Free on the returned Item.
 func (f *File) RootFolder() (*Item, error) {
 	i := newItem()
 	err := newError()
@@ -53,6 +49,7 @@ func (f *File) RootFolder() (*Item, error) {
 	return i, nil
 }
 
+// GetIdentifier returns the unique identifier for i.
 func (i *Item) GetIdentifier() (uint32, error) {
 	var id C.uint32_t
 	err := newError()
