@@ -3,10 +3,33 @@ package libpff
 // #include <stdlib.h>
 // #include <libpff.h>
 import "C"
-import "unsafe"
+import (
+	"runtime"
+	"unsafe"
+)
 
 type RecordEntry struct {
 	ptr *C.libpff_record_entry_t
+}
+
+func newRecordEntry() *RecordEntry {
+	var e RecordEntry
+	runtime.SetFinalizer(&e, func(e *RecordEntry) {
+		if e.ptr != nil {
+			if err := e.free(); err != nil {
+				panic(err)
+			}
+		}
+	})
+	return &e
+}
+func (e *RecordEntry) free() error {
+	err := newError()
+	if retSuccess != C.libpff_record_entry_free(&e.ptr, &err.ptr) {
+		return err
+	}
+	e.ptr = nil
+	return nil
 }
 
 func (s *RecordSet) GetNumEntries() (int, error) {
@@ -19,30 +42,30 @@ func (s *RecordSet) GetNumEntries() (int, error) {
 }
 
 func (s *RecordSet) GetRecordEntry(index int) (*RecordEntry, error) {
-	var e RecordEntry
+	e := newRecordEntry()
 	err := newError()
 	if retSuccess != C.libpff_record_set_get_entry_by_index(
 		s.ptr, C.int(index), &e.ptr, &err.ptr) {
 		return nil, err
 	}
-	return &e, nil
+	return e, nil
 }
 
 func (s *RecordSet) GetRecordEntryByType(
 	entryType, valueType uint32, flags uint8) (*RecordEntry, error) {
-	var e RecordEntry
+	e := newRecordEntry()
 	err := newError()
 	if retSuccess != C.libpff_record_set_get_entry_by_type(
 		s.ptr, C.uint32_t(entryType), C.uint32_t(valueType),
 		&e.ptr, C.uint8_t(flags), &err.ptr) {
 		return nil, err
 	}
-	return &e, nil
+	return e, nil
 }
 
 func (s *RecordSet) GetRecordEntryByName(
 	name string, valueType uint32, flags uint8) (*RecordEntry, error) {
-	var e RecordEntry
+	e := newRecordEntry()
 	cName := (*C.uchar)(unsafe.Pointer(C.CString(name)))
 	defer C.free(unsafe.Pointer(cName))
 	err := newError()
@@ -51,16 +74,7 @@ func (s *RecordSet) GetRecordEntryByName(
 		&e.ptr, C.uint8_t(flags), &err.ptr) {
 		return nil, err
 	}
-	return &e, nil
-}
-
-func (e *RecordEntry) Free() error {
-	err := newError()
-	if retSuccess != C.libpff_record_entry_free(&e.ptr, &err.ptr) {
-		return err
-	}
-	e.ptr = nil
-	return nil
+	return e, nil
 }
 
 func (e *RecordEntry) GetEntryType() (uint32, error) {

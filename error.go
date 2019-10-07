@@ -30,7 +30,6 @@ func newError() *Error {
 	})
 	return &e
 }
-
 func (e *Error) free() {
 	C.libpff_error_free(&e.ptr)
 	e.ptr = nil

@@ -33,7 +33,6 @@ func (i *Item) GetRecordSet(index int) (*RecordSet, error) {
 	}
 	return &s, nil
 }
-
 func (s *RecordSet) free() error {
 	err := newError()
 	if retSuccess != C.libpff_record_set_free(&s.ptr, &err.ptr) {

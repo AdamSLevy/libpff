@@ -20,11 +20,6 @@ func newItem() *Item {
 	})
 	return &i
 }
-
-// free the underlying resources associated with i.
-//
-// This must be called before i is garbage collected or else memory leaks will
-// occur.
 func (i *Item) free() error {
 	err := newError()
 	if retSuccess != C.libpff_item_free(&i.ptr, &err.ptr) {
