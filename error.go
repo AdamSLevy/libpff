@@ -13,11 +13,14 @@ const (
 	retFail    = -1
 )
 
+// Error is a *libpff_error_t.
 type Error struct {
 	ptr *C.libpff_error_t
 	str string
 }
 
+// NewError creates a new Error with a finalizer set that ensures that any
+// underlying allocated resources are freed.
 func NewError() *Error {
 	var err Error
 	runtime.SetFinalizer(&err, func(err *Error) {
