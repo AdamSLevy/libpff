@@ -86,13 +86,13 @@ func (e *RecordEntry) GetEntryType() (uint32, error) {
 	return uint32(eType), nil
 }
 
-func (e *RecordEntry) GetValueType() (uint32, error) {
+func (e *RecordEntry) GetValueType() (ValueType, error) {
 	var vType C.uint32_t
 	err := newError()
 	if retSuccess != C.libpff_record_entry_get_value_type(e.ptr, &vType, &err.ptr) {
 		return 0, err
 	}
-	return uint32(vType), nil
+	return ValueType(vType), nil
 }
 
 func (e *RecordEntry) GetDataSize() (int, error) {
